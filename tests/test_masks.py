@@ -6,7 +6,7 @@ def test_returns_get_mask_card_number(test_name): # Тест чтобы поня
     return test_name
 
 def test_valid_get_mask_card_number(test_name): # Тест с валидными данными
-    assert get_mask_card_number(test_name) == "** 1111"
+    assert get_mask_card_number(test_name) == "**** **** **** 1111"
 
 def test_str_null_get_mask_card_number(): # Тест обработки ошибки, если пользователь вводит пробел или пустую строку
     with pytest.raises(ValueError):
