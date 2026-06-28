@@ -1,5 +1,5 @@
 import pytest
-from src.masks import get_mask_card_number
+from src.masks import get_mask_card_number, get_mask_account
 
 # Test for the get_mask_card_number func
 def test_returns_get_mask_card_number(test_name): # Тест чтобы понять, что возвращает функция
@@ -20,4 +20,16 @@ def test_sym_and_num_get_mask_card_number(test_num_and_sym_number_card): # Те�
     with pytest.raises(ValueError):
         get_mask_card_number(test_num_and_sym_number_card)
 
-# test for the get_mask_account func
+# Test for the get_mask_account func
+def test_returns_get_mask_account():
+    assert get_mask_account("22222222222222222222") == "** 2222" # Тест на return
+
+def test_spasec_str_get_mask_account(): # Тест на обработку ошибки, если пользователь вместо номера введет пустую строку
+    with pytest.raises(ValueError):
+        get_mask_account(" ")
+def test_num_and_sym_get_mask_account(): # Тест на обработку ошибки, если пользователь введет номер счета с символами
+    with pytest.raises(ValueError):
+        get_mask_account("2222ffff222222222222")
+def test_long_num_get_mask_account(): # Тест на обработку ошибки, если пользователь ведет номер счета длинее чем 20 цифр
+    with pytest.raises(ValueError):
+        get_mask_account("22222222222222222222222222222222222")
