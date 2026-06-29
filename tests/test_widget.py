@@ -13,3 +13,17 @@ def test_list_mask_account_card():
 def test_long_num_mask_account_card():
     with pytest.raises(ValueError):
         mask_account_card("Visa Mastercard 11111111111111111")
+@pytest.mark.parametrize(
+    "number_card, expected",
+    [
+        (
+            "Maestro 1596837868705199",
+            "Maestro **** **** **** 5199"
+        ),
+        (
+            "Счет 64686473678894779589",
+            "Счет ** 9589"
+        )
+])
+def test_mask(number_card, expected):
+    assert mask_account_card(number_card) == expected
