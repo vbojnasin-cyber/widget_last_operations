@@ -1,4 +1,4 @@
-from src.masks import get_mask_card_number
+from src.masks import get_mask_card_number, get_mask_account
 
 
 def mask_account_card(number_account: str) -> str:
@@ -14,7 +14,7 @@ def mask_account_card(number_account: str) -> str:
         raise ValueError("Номер карты должен состоять только из цифр")
     try:
         if type_card.lower().startswith("счет"):
-            mask_card = mask_account_card(number_card)
+            mask_card = get_mask_account(number_card)
         else:
             mask_card = get_mask_card_number(number_card)
         return f"{type_card} {mask_card}".strip()
