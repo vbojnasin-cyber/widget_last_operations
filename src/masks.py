@@ -11,7 +11,7 @@ def get_mask_card_number(number_card: str) -> str:
             f" ваш содержит - {len(clean_number_card)}"
         )  # Обрабатываем ошибку
 
-    return f"** {clean_number_card[-4:]}"  # Вывод номера карты с маской
+    return f"**** **** **** {clean_number_card[-4:]}"  # Вывод номера карты с маской
 
 
 def get_mask_account(number_account: str) -> str:
