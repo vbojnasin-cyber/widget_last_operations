@@ -1,5 +1,7 @@
 import pytest
+
 from src.processing import filter_by_state, sort_by_date
+
 
 # filter_by_state
 class TestFilterByState:
@@ -61,8 +63,8 @@ class TestFilterByState:
             filter_by_state(["string", 123])
 
 
-
 # sort_by_date
+
 
 class TestSortByDate:
 
@@ -112,7 +114,3 @@ class TestSortByDate:
         """Один элемент тот же список."""
         data = [{"id": 1, "date": "2024-01-01"}]
         assert sort_by_date(data) == data
-
-
-
-

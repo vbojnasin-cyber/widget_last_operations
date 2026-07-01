@@ -13,6 +13,7 @@ def get_mask_card_number(number_card: str) -> str:
 
     return f"**** **** **** {clean_number_card[-4:]}"  # Вывод номера карты с маской
 
+
 def get_mask_account(number_account: str) -> str:
     """Функция, которая маскирует номер счета"""
     if number_account == " " or number_account == "":
