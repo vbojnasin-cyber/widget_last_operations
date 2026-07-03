@@ -27,7 +27,6 @@ def get_mask_account(number_account: str) -> str:
         raise ValueError(
             f"Номер счета должен состоять только из цифр, номер который вы ввели - {clean_number_account}"
         )
-    if len(clean_number_account) == 20:
-        return f"** {clean_number_account[-4:]}"
-    else:
-        raise ValueError("Слишком длинный номер счета")
+    if len(clean_number_account) != 20:
+        raise ValueError(f"Номер счета должен состоять из 20 цифр, ваш состоит из {len(clean_number_account)}")
+    return f"** {clean_number_account[-4:]}"
