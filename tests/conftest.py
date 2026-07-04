@@ -1,25 +1,42 @@
 import pytest
 
 
-# Фикстуры для get_mask_card_number
 @pytest.fixture
 def test_small_number_card():
+    """Фикстура с номером карты меньше 16 чисел"""
     return "11111"
 
 
 @pytest.fixture
+def test_long_number_card():
+    """Фикстура с номером карты больше 16"""
+    return "111111111111111111111111111111111"
+
+
+@pytest.fixture
 def test_name():
+    """Фикстура с валидным номером карты"""
     return "1111111111111111"
 
 
 @pytest.fixture
 def test_num_and_sym_number_card():
+    """Фикстура номера карты с буквами и цифрами"""
     return "1233333333h33333"
 
 
-# Фикстуры для generators.py
 @pytest.fixture
+def test_data():
+    """Фикстура краткой транзакции"""
+    return [
+        {"id": 1, "state": "EXECUTED"},
+        {"id": 2, "state": "CANCELED"},
+        {"id": 3, "state": "EXECUTED"},
+    ]
+
+
 def data_transactions():
+    """Фикстура полной транзакции"""
     return [
         {
             "id": 939719570,
