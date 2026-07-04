@@ -34,6 +34,7 @@ def transaction_descriptions(transactions: List[dict]) -> Iterator[Dict]:
 
 
 def number_card_generator(start: int, end: int) -> Iterator[str]:
+    """Генератор номеров банковских кард"""
     if start < 1 or end > 9999999999999999 or start > end:
         raise ValueError("Неправильно заданы значения")
     for number in range(start, end + 1):
