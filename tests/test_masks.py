@@ -4,91 +4,70 @@ from src.masks import get_mask_account, get_mask_card_number
 
 # Test for the get_mask_card_number func
 
-
 # 1 test
-def test_valid_get_mask_card_number(test_name):
-    """Тест с валидными данными"""
-    assert get_mask_card_number(test_name) == "**** **** **** 1111"
+def test_get_mask_card_number():
+    """Тест успешной маскировки корректного номера карты с пробелами и без"""
+    assert get_mask_card_number("3123453453424556") == "**** **** **** 4556"
+    assert get_mask_card_number("3123 4534 5342 4556") == "**** **** **** 4556"
 
 
 # 2 test
-def test_space_null_get_mask_card_number():
-    """Тест обработки ошибки, если пользователь вводит пробел"""
-    with pytest.raises(ValueError):
-        get_mask_card_number(" ")
-
+@pytest.mark.parametrize("empty_input", ["", " "])
+def test_get_mask_card_number_empty(empty_input):
+    """Тест генерации ошибки при пустой строке или строке из одного пробела."""
+    with pytest.raises(ValueError) as exc_info:
+        get_mask_card_number(empty_input)
+    assert "Номер карты не может быть пустым" in str(exc_info.value)
 
 # 3 test
-def test_str_null_get_mask_card_number():
-    """Тест обработки ошибки, если пользователь вводит пустую строку"""
-    with pytest.raises(ValueError):
-        get_mask_card_number("")
-
+@pytest.mark.parametrize("invalid_chars", ["1234-5678-1234-5678", "123456781234abcd", "1234 5678 1234 567a"])
+def test_get_mask_card_number_not_digit(invalid_chars):
+    """Тест генерации ошибки, если в номере есть нецифровые символы."""
+    with pytest.raises(ValueError) as exc_info:
+        get_mask_card_number(invalid_chars)
+    assert "Номер карты должен состоять только из цифр" in str(exc_info.value)
 
 # 4 test
-def test_invalid_small_number_get_mask_card_number(test_small_number_card):
-    """Тест обработки ошибки, если пользователь вводит короткий номер карты"""
-    with pytest.raises(ValueError):
-        get_mask_card_number(test_small_number_card)
-
-
-# 5 test
-def test_sym_and_num_get_mask_card_number(
-    test_num_and_sym_number_card,
-):
-    """Тест обработки ошибки, если пользователь вводит номер с цифрами и буквами"""
-    with pytest.raises(ValueError):
-        get_mask_card_number(test_num_and_sym_number_card)
-
-
-# 6 test
-def test_long_num_get_mask_card_number(test_long_number_card):
-    """Тест обработки ошибки, если пользователь вводит слишкои длинный номер карты"""
-    with pytest.raises(ValueError):
-        get_mask_card_number(test_long_number_card)
-
-
-# 7 test
-def test_space_get_mask_card_number():
-    """Тест, если пользователь введет валидный номер карты
-    состоящий из 16 чисел, но будут пробелы"""
-    assert (
-        get_mask_card_number("   1234 3456   6543 6543     ") == "**** **** **** 6543"
-    )
+@pytest.mark.parametrize("wrong_length", ["12345", "123456781234567", "12345678123456789"])
+def test_get_mask_card_number_wrong_length(wrong_length):
+    """Тест генерации ошибки при неверной длине номера (не 16 цифр)."""
+    with pytest.raises(ValueError) as exc_info:
+        get_mask_card_number(wrong_length)
+    assert "Номер карты должен содержать 16 цифр" in str(exc_info.value)
 
 
 # Test for the get_mask_account func
 
 
 # 1 test
-def test_returns_get_mask_account():
-    """Тест с валидными данными"""
-    assert get_mask_account("22222222222222222222") == "** 2222"
-
+def test_get_mask_account_success():
+    """Тест успешного маскирования корректного номера счета."""
+    # 20 цифр с пробелами
+    assert get_mask_account("7344 3456 7890 1234 5678") == "** 5678"
+    # 20 цифр без пробелов
+    assert get_mask_account("73443456789012345678") == "** 5678"
 
 # 2 test
-def test_spase_str_get_mask_account():
-    """Тест на обработку ошибки, если пользователь вместо номера введет пробел"""
-    with pytest.raises(ValueError):
-        get_mask_account(" ")
-
+@pytest.mark.parametrize("empty_input", ["", " "])
+def test_get_mask_account_empty(empty_input):
+    """Тест генерации ошибки при пустой строке или строке из одного пробела."""
+    with pytest.raises(ValueError) as exc_info:
+        get_mask_account(empty_input)
+    assert "Номер счета не может быть пустым" in str(exc_info.value)
 
 # 3 test
-def test_str_null_get_mask_account():
-    """Тест на обработку ошибки, если пользователь введет пустую строку"""
-    with pytest.raises(ValueError):
-        get_mask_account("")
+@pytest.mark.parametrize("invalid_chars", ["7344-3456-7890-1234-5678", "7344345678901234567a"])
+def test_get_mask_account_not_digit(invalid_chars):
+    """Тест генерации ошибки, если в номере счета есть нецифровые символы."""
+    with pytest.raises(ValueError) as exc_info:
+        get_mask_account(invalid_chars)
+    assert "Номер счета должен состоять только из цифр" in str(exc_info.value)
 
 
 # 4 test
-def test_num_and_sym_get_mask_account():
-    """Тест на обработку ошибки, если пользователь введет номер счета, который содержит буквы"""
-    with pytest.raises(ValueError):
-        get_mask_account("2222ffff222222222222")
-
-
-# 5 test
-def test_long_num_get_mask_account():
-    """Тест на обработку ошибки, если пользователь ведет номер счета больше чем 20 цифр"""
-    with pytest.raises(ValueError):
-        get_mask_account("22222222222222222222222222222222222")
+@pytest.mark.parametrize("wrong_length", ["12345", "7344345678901234567", "734434567890123456789"])
+def test_get_mask_account_wrong_length(wrong_length):
+    """Тест генерации ошибки при неверной длине счета (не 20 цифр)."""
+    with pytest.raises(ValueError) as exc_info:
+        get_mask_account(wrong_length)
+    assert "Номер счета должен состоять из 20 цифр" in str(exc_info.value)
