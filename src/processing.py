@@ -3,10 +3,10 @@ from typing import List
 
 def filter_by_state(*, data: List[dict], state: str = "EXECUTED") -> List[dict]:
     """Сортирует транзакции по состоянию state"""
-    if not data:
-        return []
     if not isinstance(data, list):
         raise ValueError(f"Ожидалось получение списка, а получен {type(data)}")
+    if not data:
+        return []
     for item in data:
         if not isinstance(item, dict):
             raise ValueError("Получен не словарь")
