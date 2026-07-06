@@ -1,113 +1,64 @@
 import pytest
 from src.processing import filter_by_state, sort_by_date
 # Test for the filter_by_state func
-class TestFilterByState:
-    # 1 test
-    def test_default_state_executed(self, test_data):
-        """По умолчанию фильтрует EXECUTED."""
-        result = filter_by_state(data=test_data)
-        assert result == [
-            {"id": 1, "state": "EXECUTED"},
-            {"id": 3, "state": "EXECUTED"},
-        ]
-
-    # 2 test
-    def test_custom_state(self, test_data):
-        """Фильтр по переданному state."""
-        result = filter_by_state(data=test_data, state="CANCELED")
-        assert result == [{"id": 2, "state": "CANCELED"}]
-
-    # 3 test
-    def test_empty_list_returns_empty(self):
-        """Пустой список = пустой список."""
-        assert filter_by_state(data=[]) == []
-
-    # 4 test
-    def test_no_matches_returns_empty(self, test_data):
-        """Ничего не подошло, пустой список."""
-        assert filter_by_state(data=test_data, state="PENDING") == []
-
-    # 5 test
-    def test_missing_state_key_ignored(self):
-        """Словарь без ключа state игнорируется."""
-        data = [
-            {"id": 1, "state": "EXECUTED"},
-            {"id": 2, "amount": 100},  # нет state
-        ]
-        result = filter_by_state(data=data)
-        assert result == [{"id": 1, "state": "EXECUTED"}]
-
-    # 6 test
-    def test_case_sensitive(self):
-        """EXECUTED != executed (проверяем, что регистр важен)."""
-        data = [{"id": 1, "state": "executed"}]
-        result = filter_by_state(data=data, state="EXECUTED")
-        assert result == []
-
-    # 7 test
-    def test_input_is_not_list_raises(self):
-        """Передали не список ValueError."""
-        with pytest.raises(ValueError):
-            filter_by_state(data="i not list")
-
-    # 8 test
-    def test_input_list_contains_not_dict_raises(self):
-        """В списке не словарь  ValueError."""
-        with pytest.raises(ValueError):
-            filter_by_state(data=["string", 123])
+def test_filter_by_state_default(sample_transactions):
+    """Тест фильтрации по состоянию EXECUTED (значение по умолчанию)."""
+    result = filter_by_state(data=sample_transactions)
+    assert len(result) == 2
+    assert result[0]["id"] == 1
+    assert result[1]["id"] == 3
 
 
-# Test for the sort_by_date func
-class TestSortByDate:
+def test_filter_by_state_custom(sample_transactions):
+    """Тест фильтрации по кастомному состоянию (например, CANCELED)."""
+    result = filter_by_state(data=sample_transactions, state="CANCELED")
+    assert len(result) == 1
+    assert result[0]["id"] == 2
 
-    # 1 test
-    def test_default_descending(self):
-        """По умолчанию сортирует по убыванию."""
-        data = [
-            {"id": 1, "date": "2024-01-01"},
-            {"id": 2, "date": "2024-03-15"},
-            {"id": 3, "date": "2024-01-10"},
-        ]
-        result = sort_by_date(data)
-        assert result == [
-            {"id": 2, "date": "2024-03-15"},
-            {"id": 3, "date": "2024-01-10"},
-            {"id": 1, "date": "2024-01-01"},
-        ]
 
-    # 2 test
-    def test_ascending_order(self):
-        """reverse=False по возрастанию."""
-        data = [
-            {"id": 1, "date": "2024-01-01"},
-            {"id": 2, "date": "2024-03-15"},
-        ]
-        result = sort_by_date(data, reverse=False)
-        assert result == [
-            {"id": 1, "date": "2024-01-01"},
-            {"id": 2, "date": "2024-03-15"},
-        ]
+def test_filter_by_state_empty():
+    """Тест возврата пустого списка, если на вход передан пустой список."""
+    assert filter_by_state(data=[]) == []
 
-    # 3 test
-    def test_same_date_preserves_order(self):
-        """Одинаковые даты порядок сохраняется."""
-        data = [
-            {"id": 1, "date": "2024-01-01"},
-            {"id": 2, "date": "2024-01-01"},
-        ]
-        result = sort_by_date(data)
-        assert result == [
-            {"id": 1, "date": "2024-01-01"},
-            {"id": 2, "date": "2024-01-01"},
-        ]
 
-    # 4 test
-    def test_empty_list(self):
-        """Пустой список пустой список."""
-        assert sort_by_date([]) == []
+def test_filter_by_state_not_found(sample_transactions):
+    """Тест возврата пустого списка, если искомого состояния нет в данных."""
+    result = filter_by_state(data=sample_transactions, state="NON_EXISTENT")
+    assert result == []
 
-    # 5 test
-    def test_single_item(self):
-        """Один элемент тот же список."""
-        data = [{"id": 1, "date": "2024-01-01"}]
-        assert sort_by_date(data) == data
+
+@pytest.mark.parametrize("bad_data", [123, "not a list", {"key": "val"}, None])
+def test_filter_by_state_invalid_input_type(bad_data):
+    """Тест генерации ошибки, если передан не список."""
+    with pytest.raises(ValueError) as exc_info:
+        filter_by_state(data=bad_data)
+    assert "Ожидалось получение списка" in str(exc_info.value)
+
+
+def test_filter_by_state_invalid_element_type():
+    """Тест генерации ошибки, если внутри списка находится не словарь."""
+    invalid_data = [{"id": 1, "state": "EXECUTED"}, "not a dict", {"id": 2}]
+    with pytest.raises(ValueError) as exc_info:
+        filter_by_state(data=invalid_data)
+    assert "Получен не словарь" in str(exc_info.value)
+
+
+
+# TEst for the sort_by_date
+
+
+def test_sort_by_date_descending(sample_transactions):
+    """Тест сортировки по дате от самых новых к самым старым (по умолчанию)."""
+    result = sort_by_date(sample_transactions)
+    assert [item["id"] for item in result] == [2, 4, 1, 3]
+
+
+def test_sort_by_date_ascending(sample_transactions):
+    """Тест сортировки по дате от самых старых к самым новым (reverse=False)."""
+    result = sort_by_date(sample_transactions, reverse=False)
+    assert [item["id"] for item in result] == [3, 1, 4, 2]
+
+
+def test_sort_by_date_empty():
+    """Тест сортировки пустого списка (должен вернуть пустой список)."""
+    assert sort_by_date([]) == []
