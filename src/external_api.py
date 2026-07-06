@@ -29,4 +29,5 @@ def currency_exchange(amount: float, from_currency: str):
         raise
 
 
-print(currency_exchange(100, "USD"))
+if __name__ == "__main__":
+    print(currency_exchange(100, "USD"))
