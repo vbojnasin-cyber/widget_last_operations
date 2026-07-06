@@ -1,30 +1,40 @@
-import logging
-from src import loggers
-import json
-from typing import Any, List
-from pathlib import Path
+import re
+from typing import Any, Dict, List
 
-name = Path(__file__).stem
-file_name = f"{name}.log"
-logger = loggers.create_logger(name, file_name, logging.DEBUG)
 
-def read_file_json(filename: str) -> List[dict[str, Any]]:
-    """Функция реализует чтение JSON-Файла"""
-    path_obj = Path(filename)
-    if not path_obj.is_file():
-        error_msg = f"Вы передали не файл"
-        logger.error(error_msg)
-        return []
-    logger.info(f"{filename} - Получен, следущий шаг распаковка")
+def process_bank_search(
+    data: List[Dict[str, Any]], search_string: str
+) -> List[Dict[str, Any]]:
+    """Фильтрует операции, находя подстроку в поле 'description' через регулярные выражения."""
+    if not search_string:
+        return data
+
+    filtered_data: List[Dict[str, Any]] = []
+
     try:
-        with open(path_obj, "r", encoding="utf-8") as file:
-            data = json.load(file)
-
-
-        if isinstance(data, list):
-            logger.info("Файл успешно распакован")
-            return data
-    except (json.JSONDecodeError, PermissionError):
-        logger.error("Файл поврежден или не содержит валидиных данных")
+        pattern = re.compile(re.escape(search_string), re.IGNORECASE)
+    except re.error:
         return []
-    return []
+
+    for operation in data:
+        description = operation.get("description")
+        if isinstance(description, str) and pattern.search(description):
+            filtered_data.append(operation)
+
+    return filtered_data
+
+
+def process_bank_operations(
+    data: List[Dict[str, Any]], categories: List[str]
+) -> Dict[str, int]:
+    """Считает количество операций для каждой категории из переданного списка."""
+
+    category_counts: Dict[str, int] = {category: 0 for category in categories}
+
+    for operation in data:
+        description = operation.get("description")
+
+        if isinstance(description, str) and description in category_counts:
+            category_counts[description] += 1
+
+    return category_counts
