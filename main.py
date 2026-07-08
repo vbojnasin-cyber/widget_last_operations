@@ -1,8 +1,6 @@
-"""
-Главный модуль программы работы с банковскими транзакциями.
+"""Главный модуль программы работы с банковскими транзакциями.
 Связывает функциональность file_parser, processing, generators,
-utils и widget в единый пользовательский сценарий.
-"""
+utils и widget в единый пользовательский сценарий."""
 
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +16,7 @@ from src.processing import filter_by_state, sort_by_date
 from src.generators import filter_by_currency
 from src.utils import process_bank_search
 from src.widget import mask_account_card
+from src.bd import create_table, save_transactions
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -27,6 +26,8 @@ CSV_FILE = DATA_DIR / "transactions.csv"
 XLSX_FILE = DATA_DIR / "transactions_excel.xlsx"
 
 AVAILABLE_STATUSES = ("EXECUTED", "CANCELED", "PENDING")
+
+PREVIEW_COUNT = 5
 
 
 def get_transactions_by_choice(choice: str) -> List[Dict[str, Any]]:
@@ -102,7 +103,7 @@ def ask_sort_order() -> bool:
 
 def format_date(raw_date: Any) -> str:
     """Приводит дату транзакции к формату ДД.ММ.ГГГГ, независимо от того,
-    в каком виде она пришла (ISO-строка из JSON, datetime из pandas и т.д.)."""
+    в каком виде она пришла (ISO-строка из JSON, datetime из pandas)."""
     if isinstance(raw_date, datetime):
         return raw_date.strftime("%d.%m.%Y")
 
@@ -128,7 +129,7 @@ def format_date(raw_date: Any) -> str:
 
 def format_account_or_card(value: Any) -> str:
     """Маскирует номер счета/карты через widget.mask_account_card.
-    Если значение пустое или не поддается маскированию — возвращает как есть."""
+    Если значение пустое или не поддается маскированию - возвращает как есть."""
     if not value:
         return ""
     try:
@@ -139,7 +140,7 @@ def format_account_or_card(value: Any) -> str:
 
 def format_amount(amount: Any) -> str:
     """Приводит сумму к аккуратному виду: целые числа без .0,
-    дробные — максимум с двумя знаками после точки."""
+    дробные - максимум с двумя знаками после точки."""
     try:
         value = float(amount)
     except (TypeError, ValueError):
@@ -190,17 +191,25 @@ def main() -> None:
         search_word = input("Пользователь: ").strip()
         transactions = process_bank_search(transactions, search_word)
 
-    print("\nРаспечатываю итоговый список транзакций...\n")
-
     if not transactions:
         print(
-            "Не найдено ни одной транзакции, подходящей под ваши условия фильтрации"
+            "\nНе найдено ни одной транзакции, подходящей под ваши условия фильтрации"
         )
         return
 
-    print(f"Всего банковских операций в выборке: {len(transactions)}\n")
-    for transaction in transactions:
+    print(f"\nВсего банковских операций в выборке: {len(transactions)}\n")
+
+    preview = transactions[:PREVIEW_COUNT]
+    rest = transactions[PREVIEW_COUNT:]
+
+    print(f"Показываю первые {len(preview)} операций для примера...\n")
+    for transaction in preview:
         print_transaction(transaction)
+
+    print(f"Остальные {len(rest)} операций сохраняю в базу данных...")
+    create_table()
+    saved_count = save_transactions(rest)
+    print(f"Сохранено в БД: {saved_count} операций.")
 
 
 if __name__ == "__main__":
